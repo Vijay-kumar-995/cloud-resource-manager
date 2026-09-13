@@ -1,0 +1,25 @@
+# Java compiled files
+*.class
+
+# Java build folders
+out/
+build/
+target/
+
+# VS Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+
+# Logs
+*.log
+
+# Environment / secrets
+.env
+.env.*
+
+# Temporary / backup files
+*.save
+*.swp
+*~
