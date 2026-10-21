@@ -1,0 +1,3 @@
+FROM alpine:3.20
+RUN apk add --no-cache stress-ng
+CMD ["sh", "-c", "while true; do if [ -e /tmp/go ]; then stress-ng --cpu 1 --cpu-load 90 --timeout 2s --quiet; else sleep 1; fi; done"]

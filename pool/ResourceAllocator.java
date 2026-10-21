@@ -1,3 +1,5 @@
+package pool;
+
 public class ResourceAllocator {
     public static class Allocation {
         public final AllocationRequest request;

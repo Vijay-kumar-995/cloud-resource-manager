@@ -11,3 +11,10 @@ services:
     cpus: 0.50
     mem_limit: 192m
     restart: unless-stopped
+  burst-workload:
+    build:
+      context: .
+      dockerfile: Dockerfile.burst
+    cpus: 0.25
+    mem_limit: 128m
+    restart: unless-stopped

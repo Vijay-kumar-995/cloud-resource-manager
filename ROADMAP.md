@@ -42,18 +42,22 @@
 
 ## Milestone 8 — Dynamic Allocation
 
-- [ ] Adjust Docker limits from observed demand
-- [ ] Reallocate and reclaim resources safely
+- [x] Read live per-container CPU and memory usage directly from cgroups
+- [x] Apply threshold/hysteresis policy and resize running container limits
+- [x] Reclaim unused CPU and memory through a shared resource pool
+- [x] Handle disappearing containers and emit live decisions to stdout/CSV
+- [x] Add an opt-in burst workload for exercising scale-up behavior
 
-## Milestone 9 — Experiments
+## Milestone 9 — Observability (stretch goal)
 
-- [ ] Compare static and dynamic policies
-- [ ] Compare utilization, wastage, and workload performance
+- [ ] Add a terminal dashboard or lightweight REST endpoint for pool state
+- [ ] Expand static-versus-dynamic experiments using `scripts/compare-runs.md`
 
-## Milestone 10 — Final System
+## Milestone 10 — Multi-Node (future work)
 
-- [ ] Add broader automated checks, visualization, dashboard, and final report
+- [ ] Explore coordinating resource pools across multiple Ubuntu/Docker nodes
+- [ ] Define node discovery, placement, and failure handling before implementation
 
 ## Validation note
 
-The Java sources compiled with Java 17. Both bounded workloads ran in Docker, and `static-baseline.csv` captured host and per-container measurements. The pool demo printed priority-ordered allocations. Dynamic reallocation and static-versus-dynamic comparisons are Milestones 8 and 9.
+The Java sources compile with Java 17. `monitor` retains its original CSV columns, while `run` appends decision and new-limit fields. The M8 control loop was exercised against the Compose workloads using direct cgroup reads and writes; see `scripts/compare-runs.md` for repeatable comparison scenarios. Cgroup writes require sufficient privileges (typically `sudo`).

@@ -18,11 +18,18 @@ docker compose up --build -d
 docker-compose up --build -d
 ```
 
-Both containers have a fixed limit of 0.50 CPU cores and 192 MB memory. The CPU workload keeps a processor busy; the memory workload retains about 80 MB. Check their status and limits with:
+The fixed CPU and memory workloads each have a 0.50-core and 192 MB limit. The additive burst workload has a 0.25-core and 128 MB limit and stays idle until triggered. The CPU workload keeps a processor busy; the memory workload retains about 80 MB. Check status and limits with:
 
 ```sh
 docker compose ps
 docker stats --no-stream
+```
+
+Start a burst without restarting the container, then turn it off by removing the trigger file:
+
+```sh
+docker exec cloud-resource-manager_burst-workload_1 touch /tmp/go
+docker exec cloud-resource-manager_burst-workload_1 rm /tmp/go
 ```
 
 ## Capture the static baseline
@@ -43,6 +50,19 @@ docker compose down
 
 The CSV is ignored by Git. Keep a copy elsewhere if you need to submit experiment results.
 
+## Run the live controller
+
+Compile all packaged Java sources, then start the controller with the pool capacity reserved for workloads. The controller reads cgroup v1/v2 files, applies CPU and memory limits directly, and may need root permission on the Ubuntu host:
+
+```sh
+javac *.java cgroup/*.java pool/*.java policy/*.java config/*.java metrics/*.java enforcer/*.java
+sudo java Main run 1 2.0 1024 live.csv
+```
+
+The live CSV preserves the static monitor's seven columns and appends `decision` and `new_limit`. To compare direct cgroup metrics with `docker stats`, run `java Main compare-metrics 30`. Use `java Main cgroup-read <container-id>` to inspect one container.
+
+Detailed static/live comparison commands and scenarios are in [`scripts/compare-runs.md`](scripts/compare-runs.md).
+
 ## Try the resource pool and scheduler
 
 Give the scheduler the CPU and memory capacity available to workloads after reserving enough for Ubuntu and Docker:
@@ -62,6 +82,7 @@ Run the same workload for the same duration with the same VM conditions, save th
 - `ResourceMonitor.java` reads host CPU counters and available memory from `/proc`.
 - `DockerMonitor.java` reads per-container usage through `docker stats`.
 - `Main.java` provides the metrics recorder and scheduler demonstration commands.
-- `ResourcePool.java`, `Scheduler.java`, `ResourceAllocator.java`, and `AllocationRequest.java` model Milestone 7.
+- `pool/` contains allocation requests, the shared pool, allocator, and scheduler.
+- `cgroup/`, `metrics/`, `policy/`, `config/`, and `enforcer/` contain live monitoring, control policy, and cgroup enforcement.
 - `compose.yaml`, `Dockerfile`, and `Workload.java` define the bounded test workloads.
 - `ROADMAP.md` tracks project milestones.

@@ -1,3 +1,5 @@
+package pool;
+
 public class AllocationRequest {
     public final String name;
     public final int priority;
@@ -5,6 +7,9 @@ public class AllocationRequest {
     public final double requestedCpu;
     public final double minimumMemoryMB;
     public final double requestedMemoryMB;
+    public double currentUsagePercent;
+    public int highStreak;
+    public int lowStreak;
 
     public AllocationRequest(String name, int priority, double minimumCpu, double requestedCpu,
                              double minimumMemoryMB, double requestedMemoryMB) {

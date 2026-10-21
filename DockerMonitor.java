@@ -38,7 +38,8 @@ public class DockerMonitor {
             while ((line = reader.readLine()) != null) {
                 String[] fields = line.split("\\|", 2);
                 if (fields.length == 2 && (fields[1].contains("cpu-worker")
-                        || fields[1].contains("memory-worker"))) ids.add(fields[0]);
+                        || fields[1].contains("memory-worker")
+                        || fields[1].contains("burst-workload"))) ids.add(fields[0]);
             }
         }
         String error = new String(containers.getErrorStream().readAllBytes());
