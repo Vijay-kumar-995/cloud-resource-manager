@@ -1,76 +1,67 @@
 # Dynamic Cloud Resource Pooling and Allocation System
 
-## Overview
+A small Java project that monitors Docker workloads, records a fixed-allocation baseline, and demonstrates priority-based allocation from a shared CPU and memory pool. Docker applies the fixed limits in Milestone 6. The Java scheduler in Milestone 7 plans allocations; applying changing limits is Milestone 8.
 
-This project is a Java-based dynamic cloud resource pooling and allocation system.
+## Requirements
 
-The system aims to improve resource utilization by dynamically allocating and reclaiming CPU and memory resources according to workload requirements.
+- Ubuntu Linux with Java 17 or newer
+- Docker Engine and Docker Compose (plugin or standalone `docker-compose`)
+- Permission to run Docker commands
 
-## Problem
+## Run two bounded workloads
 
-Static resource allocation assigns fixed CPU and memory resources to workloads even when their actual requirements change.
+From the project directory, build and start the CPU and memory workloads:
 
-This can lead to:
+```sh
+docker compose up --build -d
+# If using standalone Compose instead:
+docker-compose up --build -d
+```
 
-- Resource wastage
-- Poor resource utilization
-- Inefficient workload performance
+Both containers have a fixed limit of 0.50 CPU cores and 192 MB memory. The CPU workload keeps a processor busy; the memory workload retains about 80 MB. Check their status and limits with:
 
-## Proposed Solution
+```sh
+docker compose ps
+docker stats --no-stream
+```
 
-The project maintains a shared pool of CPU and memory resources.
+## Capture the static baseline
 
-A Java-based Resource Manager monitors resource usage and will dynamically allocate, reallocate, and reclaim resources based on workload demand.
+Compile the Java files and record 60 seconds of host and per-container metrics:
 
-## Technology Stack
+```sh
+javac *.java
+java Main monitor 60 static-baseline.csv
+```
 
-- Java
-- Docker
-- Linux
-- Linux cgroups
-- Ubuntu
-- VirtualBox
+The CSV contains a timestamp, host CPU usage and available memory, plus each project workload's CPU usage, memory usage, and configured memory limit. The monitor waits one second between samples; Docker command time adds to the actual interval. To stop the workloads:
 
-## Current Progress
+```sh
+docker compose down
+# Or: docker-compose down
+```
 
-- [x] Project requirements and cloud resource allocation concepts
-- [x] Java and Docker environment setup
-- [x] Linux resource monitoring concepts
-- [x] Basic Java Resource Monitor
-- [ ] Docker workload management
-- [ ] Static allocation baseline
-- [ ] Resource Pool
-- [ ] Scheduler
-- [ ] Resource Allocator
-- [ ] Dynamic resource allocation
-- [ ] Resource reallocation
-- [ ] Resource reclamation
-- [ ] Experiments and comparison
-- [ ] Metrics and visualization
-- [ ] Final dashboard and documentation
+The CSV is ignored by Git. Keep a copy elsewhere if you need to submit experiment results.
 
-## Architecture
+## Try the resource pool and scheduler
 
-```text
-Workloads / Users
-        |
-        v
-Java Resource Manager
-        |
-        +---- Resource Monitor
-        |
-        +---- Scheduler
-        |
-        +---- Resource Allocator
-        |
-        v
-Shared CPU & Memory Resource Pool
-        |
-        v
-Docker Containers
-        |
-        v
-Linux cgroups
-        |
-        v
-Linux Kernel
+Give the scheduler the CPU and memory capacity available to workloads after reserving enough for Ubuntu and Docker:
+
+```sh
+java Main plan 2.0 1024
+```
+
+It processes requests in priority order, grants the requested allocation when it fits, otherwise tries the minimum allocation, and reports requests that do not fit. This is a planning demonstration; it does not change Docker limits.
+
+## Compare results
+
+Run the same workload for the same duration with the same VM conditions, save the CSV, and use its samples to compare host and container CPU and memory usage. Record the pool capacity and workload limits with each run. Repeat runs for more reliable results. This project currently supplies a static baseline; dynamic Docker reallocation is the next milestone.
+
+## Project structure
+
+- `ResourceMonitor.java` reads host CPU counters and available memory from `/proc`.
+- `DockerMonitor.java` reads per-container usage through `docker stats`.
+- `Main.java` provides the metrics recorder and scheduler demonstration commands.
+- `ResourcePool.java`, `Scheduler.java`, `ResourceAllocator.java`, and `AllocationRequest.java` model Milestone 7.
+- `compose.yaml`, `Dockerfile`, and `Workload.java` define the bounded test workloads.
+- `ROADMAP.md` tracks project milestones.

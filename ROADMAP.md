@@ -2,85 +2,58 @@
 
 ## Milestone 1 — Understand the Problem
 
-- [x] Understand cloud resources
-- [x] Understand resource allocation
-- [x] Understand static allocation
-- [x] Understand dynamic allocation
-- [x] Understand resource pooling
-- [x] Understand monitoring
-- [x] Understand reallocation
-- [x] Understand reclamation
+- [x] Understand cloud resources, allocation, pooling, monitoring, and reclamation
 
 ## Milestone 2 — Environment Setup
 
-- [x] Ubuntu VM
-- [x] Java installation
-- [x] Docker installation
-- [x] Verify Docker resource limits
-- [x] Verify Linux cgroups
-- [x] Verify Docker and cgroups integration
+- [x] Identify Ubuntu, Java, Docker, and cgroups as the project environment
+- [x] Define container resource limits for the test workloads
 
 ## Milestone 3 — Linux Resource Monitoring
 
-- [x] Understand Linux processes
-- [x] Understand PIDs
-- [x] Understand CPU monitoring
-- [x] Understand memory monitoring
-- [x] Understand `/proc`
-- [x] Understand `/sys`
-- [x] Understand cgroups
+- [x] Read host CPU and memory information from `/proc`
+- [x] Read per-container usage through Docker stats
 
 ## Milestone 4 — Java Resource Monitor
 
-- [x] Read `/proc/meminfo`
-- [x] Read `/proc/stat`
-- [x] Calculate CPU usage
-- [x] Calculate available memory
-- [x] Create `ResourceMonitor`
-- [x] Continuously monitor CPU and memory
+- [x] Calculate host CPU usage from successive `/proc/stat` samples
+- [x] Read available memory from `/proc/meminfo`
 
 ## Milestone 5 — Docker Workloads
 
-- [ ] Create test workloads
-- [ ] Run workloads using Docker
-- [ ] Observe workload resource usage
-- [ ] Connect workloads with the Java monitor
+- [x] Create bounded CPU and memory test workloads
+- [x] Provide Docker build and startup configuration
+- [x] Provide per-container usage monitoring
+- [x] Run and observe the bounded workloads on Docker
 
 ## Milestone 6 — Static Allocation
 
-- [ ] Implement fixed resource allocation
-- [ ] Run static allocation experiments
-- [ ] Collect utilization metrics
+- [x] Configure fixed CPU and memory limits for the workloads
+- [x] Record host and container metrics to CSV for a static baseline
+- [x] Run a short static allocation baseline
 
 ## Milestone 7 — Resource Pool and Scheduler
 
-- [ ] Create Resource Pool
-- [ ] Create Scheduler
-- [ ] Create Resource Allocator
-- [ ] Implement allocation decisions
+- [x] Model total and available pool capacity
+- [x] Represent workload requests, minimums, and priorities
+- [x] Allocate requested resources or fall back to minimums
+- [x] Schedule higher-priority workloads first
+- [x] Demonstrate allocation decisions from the command line
 
 ## Milestone 8 — Dynamic Allocation
 
-- [ ] Implement dynamic allocation
-- [ ] Implement reallocation
-- [ ] Implement resource reclamation
+- [ ] Adjust Docker limits from observed demand
+- [ ] Reallocate and reclaim resources safely
 
 ## Milestone 9 — Experiments
 
-- [ ] Static allocation experiment
-- [ ] Dynamic allocation experiment
-- [ ] CPU utilization comparison
-- [ ] Memory utilization comparison
-- [ ] Resource wastage comparison
-- [ ] Workload performance comparison
+- [ ] Compare static and dynamic policies
+- [ ] Compare utilization, wastage, and workload performance
 
 ## Milestone 10 — Final System
 
-- [ ] Testing
-- [ ] Logging
-- [ ] Metrics collection
-- [ ] Visualization
-- [ ] Dashboard
-- [ ] Architecture documentation
-- [ ] Final README
-- [ ] Final presentation
+- [ ] Add broader automated checks, visualization, dashboard, and final report
+
+## Validation note
+
+The Java sources compiled with Java 17. Both bounded workloads ran in Docker, and `static-baseline.csv` captured host and per-container measurements. The pool demo printed priority-ordered allocations. Dynamic reallocation and static-versus-dynamic comparisons are Milestones 8 and 9.

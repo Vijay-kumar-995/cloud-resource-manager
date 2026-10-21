@@ -1,0 +1,13 @@
+services:
+  cpu-worker:
+    build: .
+    command: ["cpu"]
+    cpus: 0.50
+    mem_limit: 192m
+    restart: unless-stopped
+  memory-worker:
+    build: .
+    command: ["memory"]
+    cpus: 0.50
+    mem_limit: 192m
+    restart: unless-stopped
