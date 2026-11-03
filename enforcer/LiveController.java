@@ -24,7 +24,8 @@ import java.nio.file.NoSuchFileException;
 
 public class LiveController {
     public void run(int pollSeconds, double cpuCores, double memoryMB, String csvPath,
-                    HostMetricsProvider hostProvider, DisplayMetricsProvider displayProvider) throws Exception {
+                    HostMetricsSource hostProvider,
+                    DisplayMetricsSource displayProvider) throws Exception {
         if (pollSeconds < 1) throw new IllegalArgumentException("Poll interval must be at least one second");
         ResourcePool pool = new ResourcePool(cpuCores, memoryMB);
         CgroupPathResolver paths = new CgroupPathResolver();
@@ -82,6 +83,20 @@ public class LiveController {
                 Thread.sleep(pollSeconds * 1000L);
             }
         }
+    }
+
+    public record HostMetrics(double cpuPercent, long availableMemoryMB) { }
+
+    public record DisplaySample(String name, double cpuPercent, double memoryMB, double memoryLimitMB) { }
+
+    @FunctionalInterface
+    public interface HostMetricsSource {
+        HostMetrics read() throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface DisplayMetricsSource {
+        List<DisplaySample> read() throws Exception;
     }
 
     private int priority(String name) {

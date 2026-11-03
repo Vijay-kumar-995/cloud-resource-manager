@@ -9,10 +9,6 @@ import cgroup.CgroupPathResolver;
 import cgroup.CgroupReader;
 import metrics.MetricsCollector;
 import enforcer.LiveController;
-import enforcer.DisplayMetricsProvider;
-import enforcer.DisplaySample;
-import enforcer.HostMetrics;
-import enforcer.HostMetricsProvider;
 import policy.ContainerMetrics;
 import pool.AllocationRequest;
 import pool.ResourcePool;
@@ -52,16 +48,16 @@ public class Main {
         double memoryMB = Double.parseDouble(args[3]);
         String csvPath = args.length == 5 ? args[4] : null;
         long[][] previousCpu = {ResourceMonitor.getCpuTimes()};
-        HostMetricsProvider hostProvider = () -> {
+        LiveController.HostMetricsSource hostProvider = () -> {
             long[] currentCpu = ResourceMonitor.getCpuTimes();
             double cpu = ResourceMonitor.getCpuUsage(previousCpu[0], currentCpu);
             previousCpu[0] = currentCpu;
-            return new HostMetrics(cpu, ResourceMonitor.getAvailableMemoryMB());
+            return new LiveController.HostMetrics(cpu, ResourceMonitor.getAvailableMemoryMB());
         };
-        DisplayMetricsProvider displayProvider = () -> {
-            List<DisplaySample> values = new ArrayList<>();
+        LiveController.DisplayMetricsSource displayProvider = () -> {
+            List<LiveController.DisplaySample> values = new ArrayList<>();
             for (DockerMonitor.Sample sample : DockerMonitor.readSamples()) {
-                values.add(new DisplaySample(sample.name, sample.cpuPercent, sample.memoryMB,
+                values.add(new LiveController.DisplaySample(sample.name, sample.cpuPercent, sample.memoryMB,
                         sample.memoryLimitMB));
             }
             return values;

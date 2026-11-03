@@ -1,6 +1,6 @@
 # Dynamic Cloud Resource Pooling and Allocation System
 
-A small Java project that monitors Docker workloads, records a fixed-allocation baseline, and demonstrates priority-based allocation from a shared CPU and memory pool. Docker applies the fixed limits in Milestone 6. The Java scheduler in Milestone 7 plans allocations; applying changing limits is Milestone 8.
+A compact Java demo of a shared CPU and memory pool for Docker workloads. It records a static baseline, then reads live cgroup usage and adjusts container limits using a threshold policy.
 
 ## Requirements
 
@@ -73,16 +73,27 @@ java Main plan 2.0 1024
 
 It processes requests in priority order, grants the requested allocation when it fits, otherwise tries the minimum allocation, and reports requests that do not fit. This is a planning demonstration; it does not change Docker limits.
 
-## Compare results
+## Viva / presentation demo
 
-Run the same workload for the same duration with the same VM conditions, save the CSV, and use its samples to compare host and container CPU and memory usage. Record the pool capacity and workload limits with each run. Repeat runs for more reliable results. This project currently supplies a static baseline; dynamic Docker reallocation is the next milestone.
+Explain the system as one loop: **measure → decide → allocate → enforce**. `MetricsCollector` reads cgroups; `ThresholdHysteresisPolicy` waits for repeated high/low readings; `ResourcePool` grants or reclaims capacity; `LimitEnforcer` writes the new limits. `docker stats` is the visible verification path.
+
+```sh
+docker compose up --build -d
+javac *.java cgroup/*.java pool/*.java policy/*.java config/*.java metrics/*.java enforcer/*.java
+java Main plan 2.0 1024                  # show priority allocation
+java Main cgroup-read <container-id>     # show real cgroup values
+sudo java Main run 1 2.0 1024            # show live decisions and limit changes
+docker stats --no-stream                 # verify changes without restarting
+```
+
+For the burst demonstration, run `docker exec cloud-resource-manager_burst-workload_1 touch /tmp/go` in another terminal. Explain that three consecutive high polls trigger growth, five low polls trigger gradual reclamation, and the pool prevents total allocation from exceeding its capacity. Stop the controller with Ctrl-C and clean up with `docker compose down`.
 
 ## Project structure
 
 - `ResourceMonitor.java` reads host CPU counters and available memory from `/proc`.
 - `DockerMonitor.java` reads per-container usage through `docker stats`.
-- `Main.java` provides the metrics recorder and scheduler demonstration commands.
+- `Main.java` provides the metrics recorder, scheduler demo, cgroup inspection, and live-controller commands.
 - `pool/` contains allocation requests, the shared pool, allocator, and scheduler.
-- `cgroup/`, `metrics/`, `policy/`, `config/`, and `enforcer/` contain live monitoring, control policy, and cgroup enforcement.
+- `cgroup/`, `metrics/`, `policy/`, `config/`, and `enforcer/` implement cgroup measurement, the allocation policy, and limit enforcement.
 - `compose.yaml`, `Dockerfile`, and `Workload.java` define the bounded test workloads.
 - `ROADMAP.md` tracks project milestones.
